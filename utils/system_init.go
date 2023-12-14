@@ -32,7 +32,7 @@ func InitMySQL() {
 		logger.Config{
 			SlowThreshold: time.Second, // 慢SQL阈值
 			LogLevel:      logger.Info, // 日志级别
-			Colorful:      true,        //彩色
+			Colorful:      true,        // 彩色
 		},
 	)
 
@@ -40,7 +40,7 @@ func InitMySQL() {
 		&gorm.Config{Logger: newLogger})
 
 	// 初始化时确保数据库中可以存入时间为'0000-00-00 00:00:00'的值
-	DB = DB.Exec("SET @@sql_mode = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';")
+	DB.Exec("SET @@sql_mode = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';")
 
 	fmt.Println("MySQL inited:")
 }

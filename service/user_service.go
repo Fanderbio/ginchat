@@ -3,9 +3,12 @@ package service
 import (
 	"fmt"
 	"ginchat/models"
+	"ginchat/utils"
+	"math/rand"
 	"net/http"
 	"strconv"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,17 +38,64 @@ func CreateUser(c *gin.Context) {
 	user.Name = c.Query("name")
 	password := c.Query("password")
 	repassword := c.Query("repassword")
+
+	salt := fmt.Sprintf("%06d", rand.Int31())
+
+	userFind := models.FindUserByName(user.Name)
+	if userFind.Name != "" {
+		c.JSON(-1, gin.H{
+			"message": "用户名已经注册",
+		})
+		return
+	}
+
 	if password != repassword {
 		c.JSON(-1, gin.H{
 			"message": "密码不一致",
 		})
 		return
 	}
-	user.Password = password
+	user.Password = utils.MakePassword(password, salt)
+	user.Salt = salt
 
 	models.CreateUser(user)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "新增用户成功！",
+	})
+}
+
+// GetUserList
+// @Summary 所有用户
+// @Tags 用户模块
+// @param name query string false "用户名"
+// @param password query string false "密码"
+// @Success 200 {string} json{"code", "message"}
+// @Router /user/findUserByNameAndPwd [post]
+func FindUserByNameAndPwd(c *gin.Context) {
+	name := c.Query("name")
+	password := c.Query("password")
+
+	queryUser := models.FindUserByName(name)
+	if queryUser.Name == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "该用户不存在",
+		})
+		return
+	}
+
+	fmt.Println(queryUser)
+	flag := utils.ValidPassword(password, queryUser.Salt, queryUser.Password)
+	if !flag {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "密码错误",
+		})
+		return
+	}
+
+	data := models.FindUserByNameAndPwd(name, queryUser.Password)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": data,
 	})
 }
 
@@ -85,8 +135,16 @@ func UpdateUser(c *gin.Context) {
 	user.Phone = c.PostForm("phone")
 	user.Email = c.PostForm("email")
 
-
 	fmt.Println("update:", user)
+
+	_, err := govalidator.ValidateStruct(user)
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(200, gin.H{
+			"message": "修改参数不匹配",
+		})
+		return
+	}
 
 	models.UpdateUser(user)
 	c.JSON(http.StatusOK, gin.H{
