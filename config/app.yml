@@ -1,3 +1,8 @@
 mysql:
-  dns: root:huzeqin@tcp(172.25.48.1:3306)/ginchat?charset=utf8mb4&parseTime=True&loc=Local
-  
+  dns: root:huzeqin@tcp(172.29.176.1:3306)/ginchat?charset=utf8mb4&parseTime=True&loc=Local
+redis:
+  addr: "127.0.0.1:6379"
+  password: ""
+  DB: 0
+  poolSize: 30
+  minIdleConn: 30

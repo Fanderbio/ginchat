@@ -46,6 +46,12 @@ func GetUserList() []*UserBasic {
 func FindUserByNameAndPwd(name, password string) UserBasic {
 	user := UserBasic{}
 	utils.DB.Where("name = ? and password = ?", name, password).First(&user)
+
+	// token加密
+	str := fmt.Sprintf("%d", time.Now().Unix())
+	temp := utils.MD5Encode(str)
+
+	utils.DB.Model(&user).Where("id = ?", user.ID).Update("identity", temp)
 	return user
 }
 
@@ -70,8 +76,8 @@ func FindUserByEmail(email string) UserBasic {
 func CreateUser(user UserBasic) *gorm.DB {
 	// 首先判断表是否存在
 	migrator := utils.DB.Migrator()
-	// exist := migrator.HasTable(user.TableName())
-	exist := migrator.HasTable("user_basic")
+	exist := migrator.HasTable(user.TableName())
+	// exist := migrator.HasTable("user_basic")
 	if !exist {
 		fmt.Println("表不存在")
 		utils.DB.AutoMigrate(&user)
