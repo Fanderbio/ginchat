@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	db, err := gorm.Open(mysql.Open("root:huzeqin@tcp(172.29.176.1:3306)/ginchat?charset=utf8mb4&parseTime=True&loc=Local"), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open("root:huzeqin@tcp(172.23.176.1:3306)/ginchat?charset=utf8mb4&parseTime=True&loc=Local"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
